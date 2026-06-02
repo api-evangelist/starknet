@@ -21,7 +21,7 @@ tags:
   - JSON-RPC
   - Bridge
 created: '2026-05-23'
-modified: '2026-05-23'
+modified: '2026-05-29'
 specificationVersion: '0.19'
 apis:
   - aid: starknet:json-rpc
@@ -42,6 +42,8 @@ apis:
         url: https://github.com/starkware-libs/starknet-specs
       - type: Repository
         url: https://github.com/starkware-libs/starknet-specs
+      - type: AsyncAPI
+        url: https://raw.githubusercontent.com/api-evangelist/starknet/refs/heads/main/asyncapi/starknet-asyncapi.yml
   - aid: starknet:mainnet-rpc
     name: Starknet Mainnet RPC (Public Providers)
     description: >-

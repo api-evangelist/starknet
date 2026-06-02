@@ -1,0 +1,860 @@
+asyncapi: '2.6.0'
+info:
+  title: Starknet WebSocket RPC API
+  version: '0.10.3-rc.0'
+  description: |
+    AsyncAPI 2.6 description of the Starknet WebSocket JSON-RPC API as defined
+    by the upstream `starknet_ws_api.json` OpenRPC specification
+    (https://github.com/starkware-libs/starknet-specs/blob/master/api/starknet_ws_api.json).
+
+    The Starknet WebSocket API extends the JSON-RPC HTTP API with bidirectional
+    subscription streams. Clients send a `starknet_subscribe*` JSON-RPC request
+    over the WebSocket; the server replies with a `subscription_id`, and then
+    pushes `starknet_subscription*` JSON-RPC notifications carrying the
+    `subscription_id` and a method-specific `result` payload. Subscriptions are
+    closed via `starknet_unsubscribe`.
+
+    Subscription channels enumerated here:
+      - starknet_subscribeNewHeads / starknet_subscriptionNewHeads
+      - starknet_subscribeEvents / starknet_subscriptionEvents
+      - starknet_subscribeTransactionStatus / starknet_subscriptionTransactionStatus
+      - starknet_subscribeNewTransactionReceipts / starknet_subscriptionNewTransactionReceipts
+      - starknet_subscribeNewTransactions / starknet_subscriptionNewTransaction
+      - starknet_subscriptionReorg (notification dispatched across newHeads, Events,
+        TransactionStatus, NewTransactionReceipts, NewTransactions subscriptions)
+      - starknet_unsubscribe
+
+    Implemented by Starknet full nodes (Pathfinder, Juno, Papyrus) and exposed
+    by hosted providers (Alchemy, Infura, BlastAPI, Chainstack) that expose a
+    WebSocket endpoint.
+  contact:
+    name: Starknet Specs
+    url: https://github.com/starkware-libs/starknet-specs
+  license:
+    name: MIT
+    url: https://github.com/starkware-libs/starknet-specs/blob/master/LICENSE
+  tags:
+    - name: JSON-RPC
+    - name: WebSocket
+    - name: Subscriptions
+    - name: Starknet
+
+defaultContentType: application/json
+
+servers:
+  blastapi-mainnet:
+    url: starknet-mainnet.public.blastapi.io/rpc/v0_8
+    protocol: wss
+    description: BlastAPI public Starknet mainnet WebSocket endpoint.
+  blastapi-sepolia:
+    url: starknet-sepolia.public.blastapi.io/rpc/v0_8
+    protocol: wss
+    description: BlastAPI public Starknet Sepolia testnet WebSocket endpoint.
+  alchemy-mainnet:
+    url: starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_8/{apiKey}
+    protocol: wss
+    description: Alchemy Starknet mainnet WebSocket endpoint.
+    variables:
+      apiKey:
+        default: YOUR_API_KEY
+        description: Alchemy app API key.
+  infura-mainnet:
+    url: starknet-mainnet.infura.io/ws/v3/{projectId}
+    protocol: wss
+    description: Infura Starknet mainnet WebSocket endpoint.
+    variables:
+      projectId:
+        default: YOUR_PROJECT_ID
+        description: Infura project ID.
+  self-hosted:
+    url: '{host}:{port}/rpc/{version}'
+    protocol: wss
+    description: |
+      Self-hosted Starknet full node (Pathfinder, Juno, Papyrus) exposing the
+      WebSocket RPC interface.
+    variables:
+      host:
+        default: localhost
+        description: Hostname or IP of the Starknet full node.
+      port:
+        default: '9545'
+        description: WebSocket port (commonly 9545 for Pathfinder, 6061 for Juno).
+      version:
+        default: v0_8
+        enum:
+          - v0_7
+          - v0_8
+
+channels:
+  starknet_subscribeNewHeads:
+    description: |
+      Creates a WebSocket stream that fires notifications for new block headers.
+      The client publishes a `starknet_subscribeNewHeads` request and receives a
+      `subscription_id`; subsequent block header notifications are delivered
+      via `starknet_subscriptionNewHeads` carrying the same `subscription_id`.
+    publish:
+      operationId: subscribeNewHeads
+      summary: Subscribe to new block headers.
+      message:
+        $ref: '#/components/messages/SubscribeNewHeadsRequest'
+    subscribe:
+      operationId: onSubscribeNewHeadsResponse
+      summary: Receive subscription id, header notifications, or reorg notifications for this stream.
+      message:
+        oneOf:
+          - $ref: '#/components/messages/SubscriptionIdResponse'
+          - $ref: '#/components/messages/SubscriptionNewHeadsNotification'
+          - $ref: '#/components/messages/SubscriptionReorgNotification'
+          - $ref: '#/components/messages/JsonRpcErrorResponse'
+
+  starknet_subscribeEvents:
+    description: |
+      Creates a WebSocket stream that fires notifications for new Starknet
+      events matching optional `from_address`, `keys`, `block_id`, and
+      `finality_status` filters. Notifications are delivered via
+      `starknet_subscriptionEvents`.
+    publish:
+      operationId: subscribeEvents
+      summary: Subscribe to Starknet events with optional filters.
+      message:
+        $ref: '#/components/messages/SubscribeEventsRequest'
+    subscribe:
+      operationId: onSubscribeEventsResponse
+      summary: Receive subscription id, event notifications, or reorg notifications.
+      message:
+        oneOf:
+          - $ref: '#/components/messages/SubscriptionIdResponse'
+          - $ref: '#/components/messages/SubscriptionEventsNotification'
+          - $ref: '#/components/messages/SubscriptionReorgNotification'
+          - $ref: '#/components/messages/JsonRpcErrorResponse'
+
+  starknet_subscribeTransactionStatus:
+    description: |
+      Creates a WebSocket stream that first emits the current known status of
+      the supplied `transaction_hash` and then emits an event for every
+      subsequent status change, until the transaction is final
+      (ACCEPTED_ON_L1) or the subscription is closed. Notifications are
+      delivered via `starknet_subscriptionTransactionStatus`.
+    publish:
+      operationId: subscribeTransactionStatus
+      summary: Subscribe to status updates for a specific transaction hash.
+      message:
+        $ref: '#/components/messages/SubscribeTransactionStatusRequest'
+    subscribe:
+      operationId: onSubscribeTransactionStatusResponse
+      summary: Receive subscription id, status notifications, or reorg notifications.
+      message:
+        oneOf:
+          - $ref: '#/components/messages/SubscriptionIdResponse'
+          - $ref: '#/components/messages/SubscriptionTransactionStatusNotification'
+          - $ref: '#/components/messages/SubscriptionReorgNotification'
+          - $ref: '#/components/messages/JsonRpcErrorResponse'
+
+  starknet_subscribeNewTransactionReceipts:
+    description: |
+      Creates a WebSocket stream that fires notifications for new transaction
+      receipts. The client may filter by `finality_status` (vector, default
+      `[ACCEPTED_ON_L2]`; `ACCEPTED_ON_L1` is excluded) and `sender_address`.
+      Notifications are delivered via `starknet_subscriptionNewTransactionReceipts`.
+    publish:
+      operationId: subscribeNewTransactionReceipts
+      summary: Subscribe to new transaction receipts.
+      message:
+        $ref: '#/components/messages/SubscribeNewTransactionReceiptsRequest'
+    subscribe:
+      operationId: onSubscribeNewTransactionReceiptsResponse
+      summary: Receive subscription id, receipt notifications, or reorg notifications.
+      message:
+        oneOf:
+          - $ref: '#/components/messages/SubscriptionIdResponse'
+          - $ref: '#/components/messages/SubscriptionNewTransactionReceiptsNotification'
+          - $ref: '#/components/messages/SubscriptionReorgNotification'
+          - $ref: '#/components/messages/JsonRpcErrorResponse'
+
+  starknet_subscribeNewTransactions:
+    description: |
+      Creates a WebSocket stream that fires notifications for new transactions.
+      The client may filter by `finality_status` vector (default
+      `[ACCEPTED_ON_L2]`; `ACCEPTED_ON_L1` is excluded), `sender_address`, and
+      optional `tags` (e.g. `INCLUDE_PROOF_FACTS`). Notifications are delivered
+      via `starknet_subscriptionNewTransaction`.
+    publish:
+      operationId: subscribeNewTransactions
+      summary: Subscribe to new transactions.
+      message:
+        $ref: '#/components/messages/SubscribeNewTransactionsRequest'
+    subscribe:
+      operationId: onSubscribeNewTransactionsResponse
+      summary: Receive subscription id, transaction notifications, or reorg notifications.
+      message:
+        oneOf:
+          - $ref: '#/components/messages/SubscriptionIdResponse'
+          - $ref: '#/components/messages/SubscriptionNewTransactionNotification'
+          - $ref: '#/components/messages/SubscriptionReorgNotification'
+          - $ref: '#/components/messages/JsonRpcErrorResponse'
+
+  starknet_unsubscribe:
+    description: |
+      Closes a previously opened WebSocket subscription identified by
+      `subscription_id`. The server responds with a boolean indicating whether
+      the unsubscription succeeded, or an `INVALID_SUBSCRIPTION_ID` (66) error.
+    publish:
+      operationId: unsubscribe
+      summary: Close a subscription.
+      message:
+        $ref: '#/components/messages/UnsubscribeRequest'
+    subscribe:
+      operationId: onUnsubscribeResponse
+      summary: Boolean unsubscription result or JSON-RPC error.
+      message:
+        oneOf:
+          - $ref: '#/components/messages/UnsubscribeResponse'
+          - $ref: '#/components/messages/JsonRpcErrorResponse'
+
+components:
+  messages:
+    SubscribeNewHeadsRequest:
+      name: SubscribeNewHeadsRequest
+      title: starknet_subscribeNewHeads request
+      summary: JSON-RPC request opening a new-headers subscription.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, id, method]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          id: { $ref: '#/components/schemas/JsonRpcId' }
+          method: { type: string, const: starknet_subscribeNewHeads }
+          params:
+            type: object
+            properties:
+              block_id: { $ref: '#/components/schemas/SUBSCRIPTION_BLOCK_ID' }
+
+    SubscribeEventsRequest:
+      name: SubscribeEventsRequest
+      title: starknet_subscribeEvents request
+      summary: JSON-RPC request opening an events subscription.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, id, method]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          id: { $ref: '#/components/schemas/JsonRpcId' }
+          method: { type: string, const: starknet_subscribeEvents }
+          params:
+            type: object
+            properties:
+              from_address:
+                oneOf:
+                  - $ref: '#/components/schemas/ADDRESS'
+                  - type: array
+                    items: { $ref: '#/components/schemas/ADDRESS' }
+              keys: { $ref: '#/components/schemas/EVENT_KEYS' }
+              block_id: { $ref: '#/components/schemas/SUBSCRIPTION_BLOCK_ID' }
+              finality_status:
+                type: string
+                enum: [PRE_CONFIRMED, ACCEPTED_ON_L2]
+                default: ACCEPTED_ON_L2
+
+    SubscribeTransactionStatusRequest:
+      name: SubscribeTransactionStatusRequest
+      title: starknet_subscribeTransactionStatus request
+      summary: JSON-RPC request opening a transaction-status subscription.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, id, method, params]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          id: { $ref: '#/components/schemas/JsonRpcId' }
+          method: { type: string, const: starknet_subscribeTransactionStatus }
+          params:
+            type: object
+            required: [transaction_hash]
+            properties:
+              transaction_hash: { $ref: '#/components/schemas/FELT' }
+
+    SubscribeNewTransactionReceiptsRequest:
+      name: SubscribeNewTransactionReceiptsRequest
+      title: starknet_subscribeNewTransactionReceipts request
+      summary: JSON-RPC request opening a new-transaction-receipts subscription.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, id, method]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          id: { $ref: '#/components/schemas/JsonRpcId' }
+          method: { type: string, const: starknet_subscribeNewTransactionReceipts }
+          params:
+            type: object
+            properties:
+              finality_status:
+                type: array
+                items: { $ref: '#/components/schemas/TXN_STATUS_WITHOUT_L1' }
+                default: [ACCEPTED_ON_L2]
+              sender_address:
+                type: array
+                items: { $ref: '#/components/schemas/ADDRESS' }
+
+    SubscribeNewTransactionsRequest:
+      name: SubscribeNewTransactionsRequest
+      title: starknet_subscribeNewTransactions request
+      summary: JSON-RPC request opening a new-transactions subscription.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, id, method]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          id: { $ref: '#/components/schemas/JsonRpcId' }
+          method: { type: string, const: starknet_subscribeNewTransactions }
+          params:
+            type: object
+            properties:
+              finality_status:
+                type: array
+                items: { $ref: '#/components/schemas/TXN_STATUS_WITHOUT_L1' }
+                default: [ACCEPTED_ON_L2]
+              sender_address:
+                type: array
+                items: { $ref: '#/components/schemas/ADDRESS' }
+              tags:
+                type: array
+                items: { $ref: '#/components/schemas/SUBSCRIPTION_TAG' }
+
+    UnsubscribeRequest:
+      name: UnsubscribeRequest
+      title: starknet_unsubscribe request
+      summary: JSON-RPC request closing a subscription.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, id, method, params]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          id: { $ref: '#/components/schemas/JsonRpcId' }
+          method: { type: string, const: starknet_unsubscribe }
+          params:
+            type: object
+            required: [subscription_id]
+            properties:
+              subscription_id: { $ref: '#/components/schemas/SUBSCRIPTION_ID' }
+
+    SubscriptionIdResponse:
+      name: SubscriptionIdResponse
+      title: JSON-RPC subscription_id response
+      summary: |
+        Returned by the server in response to any successful
+        `starknet_subscribe*` request; the `result` is the assigned
+        `subscription_id` which is echoed in every subsequent notification.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, id, result]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          id: { $ref: '#/components/schemas/JsonRpcId' }
+          result: { $ref: '#/components/schemas/SUBSCRIPTION_ID' }
+
+    UnsubscribeResponse:
+      name: UnsubscribeResponse
+      title: starknet_unsubscribe response
+      summary: Boolean result indicating unsubscription success.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, id, result]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          id: { $ref: '#/components/schemas/JsonRpcId' }
+          result: { type: boolean }
+
+    SubscriptionNewHeadsNotification:
+      name: SubscriptionNewHeadsNotification
+      title: starknet_subscriptionNewHeads notification
+      summary: Server-pushed notification carrying a new block header.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, method, params]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          method: { type: string, const: starknet_subscriptionNewHeads }
+          params:
+            type: object
+            required: [subscription_id, result]
+            properties:
+              subscription_id: { $ref: '#/components/schemas/SUBSCRIPTION_ID' }
+              result: { $ref: '#/components/schemas/BLOCK_HEADER' }
+
+    SubscriptionEventsNotification:
+      name: SubscriptionEventsNotification
+      title: starknet_subscriptionEvents notification
+      summary: |
+        Server-pushed notification carrying an emitted event plus the
+        finality status of the emitting transaction.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, method, params]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          method: { type: string, const: starknet_subscriptionEvents }
+          params:
+            type: object
+            required: [subscription_id, result]
+            properties:
+              subscription_id: { $ref: '#/components/schemas/SUBSCRIPTION_ID' }
+              result:
+                allOf:
+                  - $ref: '#/components/schemas/EMITTED_EVENT'
+                  - type: object
+                    required: [finality_status]
+                    properties:
+                      finality_status: { $ref: '#/components/schemas/TXN_FINALITY_STATUS' }
+
+    SubscriptionTransactionStatusNotification:
+      name: SubscriptionTransactionStatusNotification
+      title: starknet_subscriptionTransactionStatus notification
+      summary: Server-pushed notification carrying an updated transaction status.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, method, params]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          method: { type: string, const: starknet_subscriptionTransactionStatus }
+          params:
+            type: object
+            required: [subscription_id, result]
+            properties:
+              subscription_id: { $ref: '#/components/schemas/SUBSCRIPTION_ID' }
+              result: { $ref: '#/components/schemas/NEW_TXN_STATUS' }
+
+    SubscriptionNewTransactionReceiptsNotification:
+      name: SubscriptionNewTransactionReceiptsNotification
+      title: starknet_subscriptionNewTransactionReceipts notification
+      summary: Server-pushed notification carrying a new transaction receipt with block info.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, method, params]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          method: { type: string, const: starknet_subscriptionNewTransactionReceipts }
+          params:
+            type: object
+            required: [subscription_id, result]
+            properties:
+              subscription_id: { $ref: '#/components/schemas/SUBSCRIPTION_ID' }
+              result: { $ref: '#/components/schemas/TXN_RECEIPT_WITH_BLOCK_INFO' }
+
+    SubscriptionNewTransactionNotification:
+      name: SubscriptionNewTransactionNotification
+      title: starknet_subscriptionNewTransaction notification
+      summary: Server-pushed notification carrying a new transaction with hash and finality status.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, method, params]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          method: { type: string, const: starknet_subscriptionNewTransaction }
+          params:
+            type: object
+            required: [subscription_id, result]
+            properties:
+              subscription_id: { $ref: '#/components/schemas/SUBSCRIPTION_ID' }
+              result:
+                allOf:
+                  - $ref: '#/components/schemas/TXN_WITH_HASH'
+                  - type: object
+                    required: [finality_status]
+                    properties:
+                      finality_status: { $ref: '#/components/schemas/TXN_STATUS_WITHOUT_L1' }
+
+    SubscriptionReorgNotification:
+      name: SubscriptionReorgNotification
+      title: starknet_subscriptionReorg notification
+      summary: |
+        Server-pushed notification that the chain has reorganized. Can be
+        emitted on subscriptions of type newHeads, Events, TransactionStatus,
+        NewTransactionReceipts, and NewTransactions.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, method, params]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          method: { type: string, const: starknet_subscriptionReorg }
+          params:
+            type: object
+            required: [subscription_id, result]
+            properties:
+              subscription_id: { $ref: '#/components/schemas/SUBSCRIPTION_ID' }
+              result: { $ref: '#/components/schemas/REORG_DATA' }
+
+    JsonRpcErrorResponse:
+      name: JsonRpcErrorResponse
+      title: JSON-RPC error response
+      summary: |
+        Returned when a `starknet_subscribe*` or `starknet_unsubscribe` request
+        fails. Error codes defined by the WebSocket spec include
+        INVALID_SUBSCRIPTION_ID (66), TOO_MANY_ADDRESSES_IN_FILTER (67), and
+        TOO_MANY_BLOCKS_BACK (68). Standard JSON-RPC method errors (e.g.
+        TOO_MANY_KEYS_IN_FILTER, BLOCK_NOT_FOUND) are also returned here.
+      contentType: application/json
+      payload:
+        type: object
+        required: [jsonrpc, id, error]
+        properties:
+          jsonrpc: { type: string, const: '2.0' }
+          id: { $ref: '#/components/schemas/JsonRpcId' }
+          error:
+            type: object
+            required: [code, message]
+            properties:
+              code: { type: integer }
+              message: { type: string }
+              data: {}
+
+  schemas:
+    JsonRpcId:
+      description: JSON-RPC request / response identifier.
+      oneOf:
+        - { type: string }
+        - { type: integer }
+        - { type: 'null' }
+
+    FELT:
+      title: Field element
+      description: |
+        A field element. Represented as a hex string up to 252 bits (the
+        Starknet prime). Matches `^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$`.
+      type: string
+      pattern: '^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$'
+
+    ADDRESS:
+      title: Contract address
+      description: A FELT-shaped Starknet contract address.
+      $ref: '#/components/schemas/FELT'
+
+    BLOCK_HASH:
+      title: Block hash
+      description: The hash of a Starknet block.
+      $ref: '#/components/schemas/FELT'
+
+    BLOCK_NUMBER:
+      title: Block number
+      type: integer
+      minimum: 0
+
+    BLOCK_TAG:
+      title: Block tag
+      description: |
+        A tag specifying a dynamic reference to a block. `SUBSCRIPTION_BLOCK_ID`
+        excludes `pre_confirmed` and `l1_accepted`.
+      type: string
+      enum: [latest, l1_accepted, pre_confirmed]
+
+    BLOCK_ID:
+      title: Block id
+      description: |
+        Block identifier accepted by Starknet JSON-RPC. May be a hash object,
+        a block number object, or a tag string.
+      oneOf:
+        - type: object
+          required: [block_hash]
+          properties:
+            block_hash: { $ref: '#/components/schemas/BLOCK_HASH' }
+        - type: object
+          required: [block_number]
+          properties:
+            block_number: { $ref: '#/components/schemas/BLOCK_NUMBER' }
+        - $ref: '#/components/schemas/BLOCK_TAG'
+
+    SUBSCRIPTION_BLOCK_ID:
+      title: Subscription block id
+      description: |
+        Same as `BLOCK_ID`, but the `pre_confirmed` and `l1_accepted` tags are
+        not allowed. Subscriptions are limited to 1024 blocks back.
+      allOf:
+        - $ref: '#/components/schemas/BLOCK_ID'
+        - not:
+            type: string
+            enum: [l1_accepted, pre_confirmed]
+
+    SUBSCRIPTION_ID:
+      title: Subscription id
+      description: |
+        Identifier for a subscription stream, used to associate notifications
+        with this subscription. Returned by every `starknet_subscribe*` call
+        and echoed in every `starknet_subscription*` notification.
+      type: string
+
+    SUBSCRIPTION_TAG:
+      title: Subscription tag
+      description: |
+        Tag controlling what additional fields are included in subscription
+        responses. `INCLUDE_PROOF_FACTS` includes a `proof_facts` field on
+        version 3 INVOKE transactions (empty array if absent).
+      type: string
+      enum: [INCLUDE_PROOF_FACTS]
+
+    TXN_HASH:
+      title: Transaction hash
+      $ref: '#/components/schemas/FELT'
+
+    TXN_FINALITY_STATUS:
+      title: Transaction finality status
+      type: string
+      enum: [PRE_CONFIRMED, ACCEPTED_ON_L2, ACCEPTED_ON_L1]
+
+    TXN_STATUS:
+      title: Transaction status
+      type: string
+      enum: [RECEIVED, CANDIDATE, PRE_CONFIRMED, ACCEPTED_ON_L2, ACCEPTED_ON_L1, REJECTED]
+
+    TXN_STATUS_WITHOUT_L1:
+      title: Transaction status (without ACCEPTED_ON_L1)
+      description: Transaction status used for new-transactions subscriptions; ACCEPTED_ON_L1 is excluded.
+      allOf:
+        - $ref: '#/components/schemas/TXN_STATUS'
+        - not:
+            type: string
+            enum: [ACCEPTED_ON_L1]
+
+    TXN_EXECUTION_STATUS:
+      title: Transaction execution status
+      type: string
+      enum: [SUCCEEDED, REVERTED]
+
+    TXN_STATUS_RESULT:
+      title: Transaction status result
+      description: |
+        Status payload returned by the transaction-status subscription
+        notification.
+      type: object
+      required: [finality_status]
+      properties:
+        finality_status: { $ref: '#/components/schemas/TXN_STATUS' }
+        execution_status: { $ref: '#/components/schemas/TXN_EXECUTION_STATUS' }
+        failure_reason: { type: string }
+
+    NEW_TXN_STATUS:
+      title: New transaction status
+      description: Payload of starknet_subscriptionTransactionStatus notification.
+      type: object
+      properties:
+        transaction_hash: { $ref: '#/components/schemas/TXN_HASH' }
+        status: { $ref: '#/components/schemas/TXN_STATUS_RESULT' }
+
+    EVENT_KEYS:
+      title: Event keys filter
+      description: |
+        Per-position list of accepted keys. Each inner array enumerates the
+        accepted values for that key position; an empty inner array matches
+        anything at that position. See Starknet JSON-RPC spec EVENT_KEYS.
+      type: array
+      items:
+        type: array
+        items: { $ref: '#/components/schemas/FELT' }
+
+    EVENT_CONTENT:
+      title: Event content
+      type: object
+      required: [keys, data]
+      properties:
+        keys:
+          type: array
+          items: { $ref: '#/components/schemas/FELT' }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/FELT' }
+
+    EVENT:
+      title: Event
+      allOf:
+        - type: object
+          required: [from_address]
+          properties:
+            from_address: { $ref: '#/components/schemas/ADDRESS' }
+        - $ref: '#/components/schemas/EVENT_CONTENT'
+
+    EMITTED_EVENT:
+      title: Emitted event
+      description: Event emitted as part of a transaction, with location info.
+      allOf:
+        - $ref: '#/components/schemas/EVENT'
+        - type: object
+          required: [block_hash, block_number, transaction_hash]
+          properties:
+            block_hash: { $ref: '#/components/schemas/BLOCK_HASH' }
+            block_number: { $ref: '#/components/schemas/BLOCK_NUMBER' }
+            transaction_hash: { $ref: '#/components/schemas/TXN_HASH' }
+
+    BLOCK_HEADER:
+      title: Block header
+      description: Starknet block header (see starknet_api_openrpc.json#BLOCK_HEADER).
+      type: object
+      required:
+        - block_hash
+        - parent_hash
+        - block_number
+        - new_root
+        - timestamp
+        - sequencer_address
+        - l1_gas_price
+        - starknet_version
+      properties:
+        block_hash: { $ref: '#/components/schemas/BLOCK_HASH' }
+        parent_hash: { $ref: '#/components/schemas/BLOCK_HASH' }
+        block_number: { $ref: '#/components/schemas/BLOCK_NUMBER' }
+        new_root: { $ref: '#/components/schemas/FELT' }
+        timestamp: { type: integer, minimum: 0 }
+        sequencer_address: { $ref: '#/components/schemas/ADDRESS' }
+        l1_gas_price: { $ref: '#/components/schemas/RESOURCE_PRICE' }
+        l1_data_gas_price: { $ref: '#/components/schemas/RESOURCE_PRICE' }
+        l2_gas_price: { $ref: '#/components/schemas/RESOURCE_PRICE' }
+        l1_da_mode:
+          type: string
+          enum: [BLOB, CALLDATA]
+        starknet_version: { type: string }
+
+    RESOURCE_PRICE:
+      title: Resource price
+      type: object
+      required: [price_in_fri, price_in_wei]
+      properties:
+        price_in_fri: { $ref: '#/components/schemas/FELT' }
+        price_in_wei: { $ref: '#/components/schemas/FELT' }
+
+    COMMON_RECEIPT_PROPERTIES:
+      title: Common receipt properties
+      type: object
+      required:
+        - transaction_hash
+        - actual_fee
+        - finality_status
+        - messages_sent
+        - events
+        - execution_resources
+        - execution_status
+      properties:
+        transaction_hash: { $ref: '#/components/schemas/TXN_HASH' }
+        actual_fee:
+          type: object
+          required: [amount, unit]
+          properties:
+            amount: { $ref: '#/components/schemas/FELT' }
+            unit:
+              type: string
+              enum: [WEI, FRI]
+        finality_status: { $ref: '#/components/schemas/TXN_FINALITY_STATUS' }
+        messages_sent:
+          type: array
+          items: { type: object }
+        events:
+          type: array
+          items: { $ref: '#/components/schemas/EVENT' }
+        execution_resources: { type: object }
+        execution_status: { $ref: '#/components/schemas/TXN_EXECUTION_STATUS' }
+        revert_reason: { type: string }
+
+    TXN_RECEIPT:
+      title: Transaction receipt
+      description: Any of the typed receipt shapes (INVOKE, L1_HANDLER, DECLARE, DEPLOY, DEPLOY_ACCOUNT).
+      allOf:
+        - $ref: '#/components/schemas/COMMON_RECEIPT_PROPERTIES'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [INVOKE, L1_HANDLER, DECLARE, DEPLOY, DEPLOY_ACCOUNT]
+            contract_address: { $ref: '#/components/schemas/ADDRESS' }
+            message_hash: { $ref: '#/components/schemas/FELT' }
+
+    TXN_RECEIPT_WITH_BLOCK_INFO:
+      title: Transaction receipt with block info
+      allOf:
+        - $ref: '#/components/schemas/TXN_RECEIPT'
+        - type: object
+          properties:
+            block_hash: { $ref: '#/components/schemas/BLOCK_HASH' }
+            block_number: { $ref: '#/components/schemas/BLOCK_NUMBER' }
+
+    TXN:
+      title: Transaction
+      description: |
+        Polymorphic Starknet transaction (INVOKE, DECLARE, DEPLOY,
+        DEPLOY_ACCOUNT, L1_HANDLER), version-tagged.
+      type: object
+      required: [type, version]
+      properties:
+        type:
+          type: string
+          enum: [INVOKE, DECLARE, DEPLOY, DEPLOY_ACCOUNT, L1_HANDLER]
+        version: { $ref: '#/components/schemas/FELT' }
+        sender_address: { $ref: '#/components/schemas/ADDRESS' }
+        nonce: { $ref: '#/components/schemas/FELT' }
+        max_fee: { $ref: '#/components/schemas/FELT' }
+        signature:
+          type: array
+          items: { $ref: '#/components/schemas/FELT' }
+        calldata:
+          type: array
+          items: { $ref: '#/components/schemas/FELT' }
+        contract_address_salt: { $ref: '#/components/schemas/FELT' }
+        constructor_calldata:
+          type: array
+          items: { $ref: '#/components/schemas/FELT' }
+        class_hash: { $ref: '#/components/schemas/FELT' }
+        compiled_class_hash: { $ref: '#/components/schemas/FELT' }
+        resource_bounds: { type: object }
+        tip: { $ref: '#/components/schemas/FELT' }
+        paymaster_data:
+          type: array
+          items: { $ref: '#/components/schemas/FELT' }
+        account_deployment_data:
+          type: array
+          items: { $ref: '#/components/schemas/FELT' }
+        nonce_data_availability_mode:
+          type: string
+          enum: [L1, L2]
+        fee_data_availability_mode:
+          type: string
+          enum: [L1, L2]
+
+    TXN_WITH_HASH:
+      title: Transaction with hash
+      allOf:
+        - $ref: '#/components/schemas/TXN'
+        - type: object
+          required: [transaction_hash]
+          properties:
+            transaction_hash: { $ref: '#/components/schemas/TXN_HASH' }
+
+    REORG_DATA:
+      title: Reorganization data
+      description: |
+        Data about a chain reorganization. Includes the first and last
+        block of the orphaned chain (hash and number).
+      type: object
+      required:
+        - starting_block_hash
+        - starting_block_number
+        - ending_block_hash
+        - ending_block_number
+      properties:
+        starting_block_hash: { $ref: '#/components/schemas/BLOCK_HASH' }
+        starting_block_number: { $ref: '#/components/schemas/BLOCK_NUMBER' }
+        ending_block_hash: { $ref: '#/components/schemas/BLOCK_HASH' }
+        ending_block_number: { $ref: '#/components/schemas/BLOCK_NUMBER' }
+
+  tags:
+    - name: subscriptions
+      description: Starknet WebSocket subscription methods (starknet_subscribe* / starknet_subscription*).
+    - name: unsubscribe
+      description: starknet_unsubscribe.
