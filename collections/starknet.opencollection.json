@@ -1,0 +1,25 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Starknet JSON-RPC API",
+    "version": "0.8.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Starknet JSON-RPC entrypoint",
+        "type": "http"
+      },
+      "http": {
+        "method": "POST",
+        "url": "https://starknet-mainnet.public.blastapi.io/rpc/v0_8/",
+        "body": {
+          "type": "json",
+          "data": "{}"
+        }
+      },
+      "docs": "Single JSON-RPC endpoint that accepts any of the methods enumerated in\nthe public Starknet specification. The `method` field selects the\noperation; `params` carries method-specific arguments.\n"
+    }
+  ],
+  "bundled": true
+}
