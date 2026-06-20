@@ -10,7 +10,7 @@ description: >-
   Cairo toolchain (Scarb, Starknet Foundry, Cairo compiler, cairo-vm), client SDKs
   (starknet.js, starknet.py, starknet-rs), the StarkGate canonical bridge between
   Ethereum and Starknet, and Voyager / Starkscan block explorers.
-image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 tags:
   - Layer 2
   - Ethereum
