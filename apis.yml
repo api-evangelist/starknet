@@ -212,6 +212,8 @@ apis:
       - type: Website
         url: https://starkscan.co
 common:
+  - type: AgenticAccess
+    url: agentic-access/starknet-agentic-access.yml
   - type: DomainSecurity
     url: security/starknet-domain-security.yml
   - type: Website
