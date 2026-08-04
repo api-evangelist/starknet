@@ -1,0 +1,14 @@
+{
+  "provider": "starknet",
+  "sources": [
+    "starknet-starknet-json-rpc-api-api-openapi.yml"
+  ],
+  "outputs": [
+    "starknet-starknet-json-rpc-api-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}
