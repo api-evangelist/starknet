@@ -203,6 +203,9 @@ apis:
   tags:
   - Block Explorer
   - Voyager
+  tags_raw:
+  - Block Explorer
+  - Voyager
   - API
   properties:
   - type: Website
@@ -215,6 +218,9 @@ apis:
   humanURL: https://starkscan.co
   baseURL: https://api.starkscan.co/api
   tags:
+  - Block Explorer
+  - Starkscan
+  tags_raw:
   - Block Explorer
   - Starkscan
   - API
