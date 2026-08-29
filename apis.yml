@@ -10,6 +10,18 @@ description: >-
   Cairo toolchain (Scarb, Starknet Foundry, Cairo compiler, cairo-vm), client SDKs
   (starknet.js, starknet.py, starknet-rs), the StarkGate canonical bridge between
   Ethereum and Starknet, and Voyager / Starkscan block explorers.
+deliveryModel:
+  model: unknown
+  open_source: unknown
+  commercial: false
+  callable_host: true
+  label: Delivery model not determined — needs a product licence on record
+  confidence: low
+  source:
+  - openapi
+  - repository-unlicensed
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: free
   onboarding: unknown
@@ -238,6 +250,10 @@ apis:
   - type: OpenAPI
     url: openapi/starknet-starknet-json-rpc-api-api-openapi.yml
 common:
+  - type: IssueTracker
+    url: https://github.com/starkware-libs/starknet-specs/issues
+  - type: Releases
+    url: https://github.com/starkware-libs/starknet-specs/releases
   - type: AgenticAccess
     url: agentic-access/starknet-agentic-access.yml
   - type: DomainSecurity
