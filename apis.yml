@@ -2,14 +2,12 @@ aid: starknet
 url: https://raw.githubusercontent.com/api-evangelist/starknet/refs/heads/main/apis.yml
 name: Starknet
 kind: company
-description: >-
-  Starknet is a permissionless Ethereum Layer 2 validity rollup developed by StarkWare,
-  powered by STARK proofs and the Cairo smart contract language. Developers interact
-  with Starknet via a versioned Starknet JSON-RPC (served by Pathfinder, Juno, and
-  Papyrus full nodes as well as Infura / Alchemy / Blast / Nethermind providers), the
-  Cairo toolchain (Scarb, Starknet Foundry, Cairo compiler, cairo-vm), client SDKs
-  (starknet.js, starknet.py, starknet-rs), the StarkGate canonical bridge between
-  Ethereum and Starknet, and Voyager / Starkscan block explorers.
+description: Starknet is a permissionless Ethereum Layer 2 validity rollup developed by StarkWare, powered
+  by STARK proofs and the Cairo smart contract language. Developers interact with Starknet via a versioned
+  Starknet JSON-RPC (served by Pathfinder, Juno, and Papyrus full nodes as well as Infura / Alchemy /
+  Blast / Nethermind providers), the Cairo toolchain (Scarb, Starknet Foundry, Cairo compiler, cairo-vm),
+  client SDKs (starknet.js, starknet.py, starknet-rs), the StarkGate canonical bridge between Ethereum
+  and Starknet, and Voyager / Starkscan block explorers.
 deliveryModel:
   model: unknown
   open_source: unknown
@@ -36,25 +34,24 @@ accessModel:
   method: derived
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/starknet.png
 tags:
-  - Layer 2
-  - Ethereum
-  - Validity Rollup
-  - ZK
-  - Cairo
-  - STARK
-  - JSON-RPC
-  - Bridge
+- Layer 2
+- Ethereum
+- Validity Rollup
+- ZK
+- Cairo
+- STARK
+- JSON-RPC
+- Bridge
 created: '2026-05-23'
-modified: '2026-05-29'
+modified: '2026-09-16'
 specificationVersion: '0.23'
 apis:
 - aid: starknet:json-rpc
   name: Starknet JSON-RPC Specification
-  description: >-
-    Versioned JSON-RPC specification implemented by Starknet full nodes (Pathfinder, Juno, Papyrus) and
-    infrastructure providers. Defines read methods (starknet_* for blocks, transactions, classes, state,
-    storage, events), trace methods, and write methods for invoking, deploying accounts, and declaring
-    classes.
+  description: Versioned JSON-RPC specification implemented by Starknet full nodes (Pathfinder, Juno,
+    Papyrus) and infrastructure providers. Defines read methods (starknet_* for blocks, transactions,
+    classes, state, storage, events), trace methods, and write methods for invoking, deploying accounts,
+    and declaring classes.
   humanURL: https://github.com/starkware-libs/starknet-specs
   baseURL: https://github.com/starkware-libs/starknet-specs
   tags:
@@ -67,13 +64,12 @@ apis:
   - type: Repository
     url: https://github.com/starkware-libs/starknet-specs
   - type: AsyncAPI
-    url: >-
-      https://raw.githubusercontent.com/api-evangelist/starknet/refs/heads/main/asyncapi/starknet-asyncapi.yml
+    url: https://raw.githubusercontent.com/api-evangelist/starknet/refs/heads/main/asyncapi/starknet-asyncapi.yml
 - aid: starknet:mainnet-rpc
   name: Starknet Mainnet RPC (Public Providers)
-  description: >-
-    Starknet Mainnet (chain ID SN_MAIN) is reached via the Starknet JSON-RPC at hosted providers — Infura,
-    Alchemy, Blast, Nethermind Voyager, Lava, Chainstack — or via self-hosted Pathfinder / Juno full nodes.
+  description: Starknet Mainnet (chain ID SN_MAIN) is reached via the Starknet JSON-RPC at hosted providers
+    — Infura, Alchemy, Blast, Nethermind Voyager, Lava, Chainstack — or via self-hosted Pathfinder / Juno
+    full nodes.
   humanURL: https://docs.starknet.io/quick-start/environment-setup
   baseURL: https://starknet-mainnet.public.blastapi.io
   tags:
@@ -85,9 +81,8 @@ apis:
     url: https://docs.starknet.io/quick-start/environment-setup
 - aid: starknet:sepolia-rpc
   name: Starknet Sepolia RPC (Public Providers)
-  description: >-
-    Public JSON-RPC endpoint for Starknet Sepolia testnet (chain ID SN_SEPOLIA) for development and integration
-    testing.
+  description: Public JSON-RPC endpoint for Starknet Sepolia testnet (chain ID SN_SEPOLIA) for development
+    and integration testing.
   humanURL: https://docs.starknet.io/quick-start/environment-setup
   baseURL: https://starknet-sepolia.public.blastapi.io
   tags:
@@ -99,9 +94,8 @@ apis:
     url: https://docs.starknet.io/quick-start/environment-setup
 - aid: starknet:starkgate-bridge
   name: StarkGate Bridge
-  description: >-
-    Canonical L1<->L2 bridge for ETH and ERC-20 tokens between Ethereum and Starknet, operated by StarkWare.
-    Bridge contracts are open-source.
+  description: Canonical L1<->L2 bridge for ETH and ERC-20 tokens between Ethereum and Starknet, operated
+    by StarkWare. Bridge contracts are open-source.
   humanURL: https://starkgate.starknet.io
   baseURL: https://starkgate.starknet.io
   tags:
@@ -117,9 +111,8 @@ apis:
     url: https://github.com/starknet-io/starkgate-contracts
 - aid: starknet:starknet-js
   name: starknet.js SDK
-  description: >-
-    JavaScript / TypeScript SDK for Starknet — providers, accounts, contract classes, ABI parsing, transaction
-    signing, and integration with browser wallets via the wallet API (get-starknet).
+  description: JavaScript / TypeScript SDK for Starknet — providers, accounts, contract classes, ABI parsing,
+    transaction signing, and integration with browser wallets via the wallet API (get-starknet).
   humanURL: https://www.starknetjs.com
   baseURL: https://github.com/starknet-io/starknet.js
   tags:
@@ -133,9 +126,8 @@ apis:
     url: https://github.com/starknet-io/starknet.js
 - aid: starknet:starknet-py
   name: starknet.py SDK
-  description: >-
-    Python SDK for Starknet maintained by Software Mansion, covering account / contract interaction, Cairo
-    ABI handling, and the Starknet JSON-RPC.
+  description: Python SDK for Starknet maintained by Software Mansion, covering account / contract interaction,
+    Cairo ABI handling, and the Starknet JSON-RPC.
   humanURL: https://starknetpy.readthedocs.io
   baseURL: https://github.com/software-mansion/starknet.py
   tags:
@@ -148,9 +140,8 @@ apis:
     url: https://github.com/software-mansion/starknet.py
 - aid: starknet:starknet-rs
   name: starknet-rs SDK
-  description: >-
-    Rust SDK for Starknet with high-performance providers, accounts, contract bindings, ABI codegen, and
-    Cairo serialization.
+  description: Rust SDK for Starknet with high-performance providers, accounts, contract bindings, ABI
+    codegen, and Cairo serialization.
   humanURL: https://github.com/xJonathanLEI/starknet-rs
   baseURL: https://github.com/xJonathanLEI/starknet-rs
   tags:
@@ -161,9 +152,9 @@ apis:
     url: https://github.com/xJonathanLEI/starknet-rs
 - aid: starknet:cairo
   name: Cairo Language
-  description: >-
-    Cairo is StarkWare's Turing-complete language for creating provable programs and the canonical smart
-    contract language for Starknet. Distributed as the Cairo compiler (Rust) and the Scarb package manager.
+  description: Cairo is StarkWare's Turing-complete language for creating provable programs and the canonical
+    smart contract language for Starknet. Distributed as the Cairo compiler (Rust) and the Scarb package
+    manager.
   humanURL: https://book.cairo-lang.org
   baseURL: https://github.com/starkware-libs/cairo
   tags:
@@ -179,9 +170,8 @@ apis:
     url: https://docs.swmansion.com/scarb
 - aid: starknet:pathfinder
   name: Pathfinder Full Node
-  description: >-
-    Rust implementation of a Starknet full node from Equilibrium that serves the Starknet JSON-RPC, syncs
-    from Ethereum L1 data, and verifies state transitions.
+  description: Rust implementation of a Starknet full node from Equilibrium that serves the Starknet JSON-RPC,
+    syncs from Ethereum L1 data, and verifies state transitions.
   humanURL: https://github.com/eqlabs/pathfinder
   baseURL: https://github.com/eqlabs/pathfinder
   tags:
@@ -193,9 +183,8 @@ apis:
     url: https://github.com/eqlabs/pathfinder
 - aid: starknet:juno
   name: Juno Full Node
-  description: >-
-    Go implementation of a Starknet full node from Nethermind that serves the Starknet JSON-RPC and acts
-    as a sequencer / RPC backend.
+  description: Go implementation of a Starknet full node from Nethermind that serves the Starknet JSON-RPC
+    and acts as a sequencer / RPC backend.
   humanURL: https://github.com/NethermindEth/juno
   baseURL: https://github.com/NethermindEth/juno
   tags:
@@ -207,9 +196,8 @@ apis:
     url: https://github.com/NethermindEth/juno
 - aid: starknet:voyager-explorer
   name: Voyager Block Explorer
-  description: >-
-    Nethermind-built block explorer for Starknet Mainnet and Sepolia with a public REST API for blocks,
-    transactions, contracts, classes, events, and tokens.
+  description: Nethermind-built block explorer for Starknet Mainnet and Sepolia with a public REST API
+    for blocks, transactions, contracts, classes, events, and tokens.
   humanURL: https://voyager.online
   baseURL: https://api.voyager.online/beta
   tags:
@@ -224,9 +212,8 @@ apis:
     url: https://voyager.online
 - aid: starknet:starkscan-explorer
   name: Starkscan Block Explorer
-  description: >-
-    Block explorer for Starknet Mainnet, Sepolia, and Sepolia Integration with a public REST API for blocks,
-    transactions, events, classes, and NFTs.
+  description: Block explorer for Starknet Mainnet, Sepolia, and Sepolia Integration with a public REST
+    API for blocks, transactions, events, classes, and NFTs.
   humanURL: https://starkscan.co
   baseURL: https://api.starkscan.co/api
   tags:
@@ -240,7 +227,7 @@ apis:
   - type: Website
     url: https://starkscan.co
 - aid: starknet:starknet-starknet-json-rpc-api-api
-  name: Starknet Starknet JSON RPC API API
+  name: Starknet JSON RPC API
   description: The Starknet JSON RPC API API from Starknet — 1 operation(s) for starknet json rpc api.
   humanURL: https://github.com/starkware-libs/starknet-specs
   baseURL: https://github.com/starkware-libs/starknet-specs
@@ -250,48 +237,48 @@ apis:
   - type: OpenAPI
     url: openapi/starknet-starknet-json-rpc-api-api-openapi.yml
 common:
-  - type: IssueTracker
-    url: https://github.com/starkware-libs/starknet-specs/issues
-  - type: Releases
-    url: https://github.com/starkware-libs/starknet-specs/releases
-  - type: AgenticAccess
-    url: agentic-access/starknet-agentic-access.yml
-  - type: DomainSecurity
-    url: security/starknet-domain-security.yml
-  - type: Website
-    url: https://www.starknet.io
-  - type: Documentation
-    url: https://docs.starknet.io
-  - type: Foundation
-    url: https://www.starknet.io/foundation
-  - type: GitHubStarkWare
-    url: https://github.com/starkware-libs
-  - type: GitHubStarknet
-    url: https://github.com/starknet-io
-  - type: Specs
-    url: https://github.com/starkware-libs/starknet-specs
-  - type: Bridge
-    url: https://starkgate.starknet.io
-  - type: Community
-    url: https://community.starknet.io
-  - type: Twitter
-    url: https://x.com/Starknet
-  - type: Discord
-    url: https://discord.gg/starknet-community
-  - type: Telegram
-    url: https://t.me/sncorestars
-  - type: Blog
-    url: https://www.starknet.io/blog
+- type: IssueTracker
+  url: https://github.com/starkware-libs/starknet-specs/issues
+- type: Releases
+  url: https://github.com/starkware-libs/starknet-specs/releases
+- type: AgenticAccess
+  url: agentic-access/starknet-agentic-access.yml
+- type: DomainSecurity
+  url: security/starknet-domain-security.yml
+- type: Website
+  url: https://www.starknet.io
+- type: Documentation
+  url: https://docs.starknet.io
+- type: Foundation
+  url: https://www.starknet.io/foundation
+- type: GitHubStarkWare
+  url: https://github.com/starkware-libs
+- type: GitHubStarknet
+  url: https://github.com/starknet-io
+- type: Specs
+  url: https://github.com/starkware-libs/starknet-specs
+- type: Bridge
+  url: https://starkgate.starknet.io
+- type: Community
+  url: https://community.starknet.io
+- type: Twitter
+  url: https://x.com/Starknet
+- type: Discord
+  url: https://discord.gg/starknet-community
+- type: Telegram
+  url: https://t.me/sncorestars
+- type: Blog
+  url: https://www.starknet.io/blog
 integrations:
-  - name: Ethereum
-  - name: Infura
-  - name: Alchemy
-  - name: Blast API
-  - name: Chainstack
-  - name: Nethermind
-  - name: Equilibrium
-  - name: Software Mansion
-  - name: The Graph
+- name: Ethereum
+- name: Infura
+- name: Alchemy
+- name: Blast API
+- name: Chainstack
+- name: Nethermind
+- name: Equilibrium
+- name: Software Mansion
+- name: The Graph
 maintainers:
-  - FN: Kin Lane
-    email: kin@apievangelist.com
+- FN: Kin Lane
+  email: kin@apievangelist.com
