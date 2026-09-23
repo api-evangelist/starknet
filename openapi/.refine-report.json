@@ -1,7 +1,7 @@
 {
   "provider": "starknet",
   "sources": [
-    "starknet-starknet-json-rpc-api-api-openapi.yml"
+    "_original/starknet-openapi.yml"
   ],
   "outputs": [
     "starknet-starknet-json-rpc-api-api-openapi.yml"
@@ -9,6 +9,14 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "starknet-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "starknet-openapi.yml: tagged paths POST / -> Starknet JSON RPC API",
+    "starknet-openapi.yml: declared missing tag: Starknet JSON RPC API",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "starknet-starknet-json-rpc-api-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }
