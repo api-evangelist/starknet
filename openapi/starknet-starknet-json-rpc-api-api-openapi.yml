@@ -89,29 +89,6 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
-    JsonRpcResponse:
-      type: object
-      required:
-      - jsonrpc
-      properties:
-        jsonrpc:
-          type: string
-          const: '2.0'
-        id:
-          oneOf:
-          - type: string
-          - type: integer
-          - type: 'null'
-        result:
-          description: Method-specific result payload.
-        error:
-          type: object
-          properties:
-            code:
-              type: integer
-            message:
-              type: string
-            data: {}
     JsonRpcRequest:
       type: object
       required:
@@ -160,3 +137,26 @@ components:
           oneOf:
           - type: array
           - type: object
+    JsonRpcResponse:
+      type: object
+      required:
+      - jsonrpc
+      properties:
+        jsonrpc:
+          type: string
+          const: '2.0'
+        id:
+          oneOf:
+          - type: string
+          - type: integer
+          - type: 'null'
+        result:
+          description: Method-specific result payload.
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+            message:
+              type: string
+            data: {}
